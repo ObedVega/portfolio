@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Presupuesto · Sitio web distribución QT Tools</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" crossorigin="anonymous" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" />
+<style>
+  :root {
+    --bg: #f8f8f5;
+    --surface: #ffffff;
+    --text: #171717;
+    --muted: #63635e;
+    --border: #e7e7e1;
+    --accent: #dfff64;
+    --accent-ink: #b9df32;
+    --ink-panel: #191a18;
+    --ink-muted: #b9b9af;
+    --radius: 18px;
+    --font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #ecece6;
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 14px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    padding: 40px 16px 96px;
+  }
+  a { color: inherit; text-decoration: none; }
+
+  .label {
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 10.5px;
+    font-weight: 600;
+  }
+  .num { font-variant-numeric: tabular-nums; }
+
+  /* Hoja */
+  .sheet {
+    max-width: 860px;
+    margin: 0 auto;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .pad { padding: 44px 52px; }
+
+  /* Membrete */
+  .letterhead {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    padding: 22px 52px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .logo { font-size: 18px; font-weight: 700; letter-spacing: -0.04em; }
+  .logo span { display: inline-block; width: 9px; height: 9px; background: var(--accent-ink); border-radius: 50%; margin-left: 3px; }
+  .letterhead .who { font-size: 12.5px; color: var(--muted); text-align: right; line-height: 1.5; }
+
+  /* Título */
+  .title-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 32px;
+    align-items: end;
+    padding-bottom: 32px;
+    border-bottom: 1px solid var(--border);
+  }
+  h1 {
+    font-size: 40px;
+    line-height: 1.05;
+    letter-spacing: -0.045em;
+    font-weight: 650;
+    margin-top: 12px;
+    max-width: 520px;
+  }
+  h1 .hl { position: relative; z-index: 1; white-space: nowrap; }
+  h1 .hl::after { content: ""; position: absolute; left: 0; right: 0; bottom: 5%; height: 24%; background: var(--accent); z-index: -1; }
+  .folio { text-align: right; display: flex; flex-direction: column; gap: 10px; }
+  .folio div { display: flex; flex-direction: column; gap: 2px; }
+  .folio b { font-size: 13.5px; font-weight: 600; }
+
+  /* Datos del cliente */
+  .parties { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border-bottom: 1px solid var(--border); }
+  .parties > div { padding: 22px 0; display: flex; flex-direction: column; gap: 4px; }
+  .parties > div + div { padding-left: 28px; border-left: 1px solid var(--border); }
+  .parties b { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
+  .parties p { color: var(--muted); font-size: 13px; }
+
+  .scope { padding: 24px 0 8px; color: var(--muted); max-width: 640px; }
+  .scope strong { color: var(--text); font-weight: 600; }
+  .note {
+    display: inline-flex; align-items: center; gap: 8px;
+    margin-top: 16px; padding: 7px 14px;
+    background: var(--accent); border-radius: 100px;
+    font-size: 12.5px; font-weight: 600;
+  }
+  .note::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--text); }
+
+  /* Opciones */
+  .options { margin-top: 36px; }
+  .options-head { display: flex; justify-content: space-between; align-items: baseline; padding-bottom: 12px; border-bottom: 2px solid var(--text); }
+  .option {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 32px;
+    padding: 26px 0;
+    border-bottom: 1px solid var(--border);
+    break-inside: avoid;
+  }
+  .opt-side { display: flex; flex-direction: column; gap: 6px; }
+  .opt-tag {
+    align-self: flex-start;
+    font-size: 10.5px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+    border: 1px solid currentColor; border-radius: 100px; padding: 3px 10px;
+  }
+  .opt-side h3 { font-size: 19px; line-height: 1.2; letter-spacing: -0.03em; font-weight: 600; margin-top: 6px; }
+  .opt-side .sub { color: var(--muted); font-size: 12.5px; }
+  .price { margin-top: 14px; font-size: 30px; font-weight: 650; letter-spacing: -0.04em; line-height: 1; }
+  .price small { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; color: var(--muted); margin-left: 4px; }
+  .opt-meta { display: flex; gap: 16px; margin-top: 10px; font-size: 12px; color: var(--muted); }
+  .opt-meta b { color: var(--text); font-weight: 600; }
+
+  .opt-work .inherit {
+    display: inline-block; font-size: 12px; font-weight: 600;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 100px; padding: 4px 12px; margin-bottom: 10px;
+  }
+  .opt-work ul { list-style: none; }
+  .opt-work li {
+    display: grid; grid-template-columns: 18px 1fr; gap: 6px;
+    padding: 8px 0; border-top: 1px solid var(--border);
+    font-size: 13.5px; color: var(--muted); line-height: 1.55;
+  }
+  .opt-work li:first-child { border-top: 0; padding-top: 0; }
+  .opt-work li::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--accent-ink); margin-top: 7px; }
+  .opt-work li strong { color: var(--text); font-weight: 600; }
+
+  /* Resumen de importes */
+  .totals { margin-top: 36px; display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: start; }
+  .totals-table { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 6px 20px; }
+  .t-row { display: flex; justify-content: space-between; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 13.5px; }
+  .t-row:last-child { border-bottom: 0; }
+  .t-row span:first-child { color: var(--muted); }
+  .t-row b { font-weight: 650; white-space: nowrap; }
+  .totals-copy h4 { font-size: 17px; letter-spacing: -0.02em; font-weight: 600; margin: 6px 0 8px; }
+  .totals-copy p { color: var(--muted); font-size: 13px; }
+
+  /* Alcance y condiciones */
+  .terms { margin-top: 36px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .term { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; break-inside: avoid; }
+  .term ul { list-style: none; margin-top: 10px; }
+  .term li { font-size: 12.5px; color: var(--muted); padding: 6px 0; border-top: 1px solid var(--border); line-height: 1.5; }
+  .term li:first-child { border-top: 0; padding-top: 0; }
+  .term li b { color: var(--text); font-weight: 600; }
+
+  /* Aceptación */
+  .accept {
+    background: var(--ink-panel);
+    color: #fff;
+    padding: 34px 52px 38px;
+    display: grid;
+    grid-template-columns: 1.1fr 1fr 1fr;
+    gap: 28px;
+    align-items: end;
+    break-inside: avoid;
+  }
+  .accept .label { color: var(--ink-muted); }
+  .accept h4 { font-size: 20px; letter-spacing: -0.03em; font-weight: 600; margin-top: 6px; }
+  .accept { grid-template-columns: 0.9fr 1.3fr 0.9fr; align-items: stretch; }
+  .accept-intro p { color: var(--ink-muted); font-size: 12.5px; margin-top: 8px; line-height: 1.55; }
+  .checks { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+  .checks label { cursor: pointer; }
+  .checks input { position: absolute; opacity: 0; pointer-events: none; }
+  .checks span {
+    display: inline-flex; align-items: center; gap: 7px;
+    border: 1px solid #55554f; border-radius: 100px; padding: 7px 13px;
+    font-size: 13px; font-weight: 600; transition: background .15s, border-color .15s, color .15s;
+  }
+  .checks span::before { content: ""; width: 12px; height: 12px; border: 1.5px solid var(--accent); border-radius: 50%; }
+  .checks label:hover span { border-color: var(--ink-muted); }
+  .checks input:checked + span { background: var(--accent); border-color: var(--accent); color: var(--text); }
+  .checks input:checked + span::before { background: var(--text); border-color: var(--text); box-shadow: inset 0 0 0 2px var(--accent); }
+  .checks input:focus-visible + span { outline: 2px solid #fff; outline-offset: 2px; }
+
+  .sigbox { display: flex; flex-direction: column; gap: 8px; }
+  .sigpad {
+    position: relative; flex: 1; min-height: 120px;
+    border: 1px dashed #55554f; border-radius: 12px; background: #20211f;
+  }
+  .sigpad canvas { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: crosshair; border-radius: 12px; }
+  .sigpad .hint { position: absolute; inset: 0; display: grid; place-items: center; color: #6f6f68; font-size: 12.5px; pointer-events: none; }
+  .sigpad.signed .hint { display: none; }
+  .sigpad.signed { border-style: solid; }
+  .sig-actions { display: flex; justify-content: space-between; align-items: center; }
+  .link-btn { background: none; border: 0; color: var(--ink-muted); font: 500 12px var(--font); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+  .link-btn:hover { color: #fff; }
+
+  .fields { display: flex; flex-direction: column; gap: 16px; justify-content: flex-end; }
+  .field { display: flex; flex-direction: column; gap: 4px; }
+  .field input {
+    background: transparent; border: 0; border-bottom: 1px solid #55554f; color: #fff;
+    font: 500 14px var(--font); padding: 6px 0; outline: none; width: 100%;
+    color-scheme: dark;
+  }
+  .field input:focus { border-bottom-color: var(--accent); }
+  .field input::placeholder { color: #6f6f68; }
+
+  .sign-btn {
+    margin-top: 4px; background: var(--accent); color: var(--text); border: 0; border-radius: 100px;
+    padding: 12px 18px; font: 600 13px var(--font); cursor: pointer; transition: transform .2s, opacity .2s;
+  }
+  .sign-btn:hover { transform: translateY(-2px); }
+  .form-msg { font-size: 12px; color: #ffb4a6; min-height: 16px; }
+
+  .stamp {
+    display: none; align-items: center; gap: 8px; margin-top: 14px;
+    font-size: 12px; font-weight: 600; color: var(--accent);
+  }
+  .stamp::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+  .sheet.is-signed .stamp { display: inline-flex; }
+  .option.chosen { box-shadow: inset 4px 0 0 var(--accent-ink); padding-left: 18px; }
+  .option.chosen .opt-tag { background: var(--accent); border-color: var(--accent); }
+  .sheet-foot {
+    display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+    padding: 14px 52px; font-size: 11.5px; color: var(--ink-muted); background: var(--ink-panel);
+    border-top: 1px solid #2c2d2a;
+  }
+  .sheet-foot a { color: var(--accent); }
+
+  .print-btn {
+    position: fixed; right: 20px; bottom: 20px;
+    background: var(--text); color: var(--bg);
+    border: 0; border-radius: 100px; padding: 12px 20px;
+    font: 600 13px var(--font); cursor: pointer;
+    box-shadow: 0 10px 28px rgba(0,0,0,.18);
+  }
+  .print-btn:hover { opacity: .85; }
+
+  /* Modo exportación a PDF (se activa solo mientras se genera el archivo) */
+  body.exporting { padding: 0; background: #fff; }
+  body.exporting .sheet { width: 816px; max-width: none; margin: 0; border: 0; border-radius: 0; }
+  body.exporting .no-print { display: none !important; }
+  body.exporting .field input::-webkit-calendar-picker-indicator { display: none; }
+  body.exporting .pad { padding: 34px 40px; }
+  body.exporting .letterhead, body.exporting .accept, body.exporting .sheet-foot { padding-left: 40px; padding-right: 40px; }
+  body.exporting .option { grid-template-columns: 190px 1fr; gap: 26px; }
+  body.exporting .totals, body.exporting .terms { grid-template-columns: 1fr 1fr; }
+  body.exporting .terms { grid-template-columns: repeat(3, 1fr); }
+  body.exporting .accept { grid-template-columns: 0.9fr 1.3fr 0.9fr; }
+  body.exporting .title-row { grid-template-columns: 1fr auto; }
+  body.exporting .parties { grid-template-columns: 1fr 1fr; }
+  body.exporting .parties > div + div { padding-left: 28px; border-left: 1px solid var(--border); border-top: 0; }
+  body.exporting .folio { text-align: right; flex-direction: column; }
+  body.exporting h1 { font-size: 38px; }
+
+  @media screen and (max-width: 720px) {
+    body { padding: 0 0 88px; background: var(--bg); }
+    .sheet { border: 0; border-radius: 0; }
+    .pad { padding: 30px 18px; }
+    .letterhead, .accept, .sheet-foot { padding-left: 18px; padding-right: 18px; }
+    .title-row { grid-template-columns: 1fr; gap: 18px; }
+    .folio { text-align: left; flex-direction: row; flex-wrap: wrap; gap: 18px; }
+    h1 { font-size: 32px; }
+    .parties { grid-template-columns: 1fr; }
+    .parties > div + div { padding-left: 0; border-left: 0; border-top: 1px solid var(--border); }
+    .option { grid-template-columns: 1fr; gap: 18px; }
+    .totals, .terms, .accept { grid-template-columns: 1fr; }
+  }
+
+  @media print {
+    @page { size: letter; margin: 10mm; }
+    body { background: #fff; padding: 0; font-size: 12.5px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .sheet { border: 0; border-radius: 0; max-width: none; }
+    .print-btn { display: none; }
+    .pad { padding: 26px 30px; }
+    .letterhead, .accept, .sheet-foot { padding-left: 30px; padding-right: 30px; }
+    h1 { font-size: 34px; }
+    .option { padding: 18px 0; grid-template-columns: 190px 1fr; }
+    .opt-work li { font-size: 12px; padding: 5px 0; }
+    .price { font-size: 26px; }
+    .totals, .terms { break-inside: avoid; }
+    .options, .totals, .terms { margin-top: 20px; }
+    .option { padding: 14px 0; }
+    .parties > div { padding: 14px 0; }
+    .title-row { padding-bottom: 20px; }
+    .scope { padding-top: 16px; font-size: 12px; }
+    .term { padding: 14px 16px; }
+    .term li { font-size: 11.5px; padding: 4px 0; }
+    .accept { padding: 24px 30px 26px; }
+    .no-print { display: none !important; }
+    .sigpad { min-height: 90px; }
+    .sheet:not(.is-signed) .sigpad .hint { display: none; }
+    .field input::placeholder { color: transparent; }
+    .field input::-webkit-calendar-picker-indicator { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="sheet">
+
+  <!-- MEMBRETE -->
+  <div class="letterhead">
+    <div class="logo">obed<span></span></div>
+    <div class="who">Obed Vega · Product Builder<br>Tijuana, B.C. · obedvega.github.io/portfolio</div>
+  </div>
+
+  <div class="pad">
+
+    <!-- TÍTULO -->
+    <div class="title-row">
+      <div>
+        <span class="label">Presupuesto · Mano de obra</span>
+        <h1>Sitio web para la distribución <span class="hl">QT Tools</span></h1>
+      </div>
+      <div class="folio">
+        <div><span class="label">Fecha</span><b class="num">04 / 11 / 2026</b></div>
+        <div><span class="label">Vigencia</span><b>15 días naturales</b></div>
+        <div><span class="label">Moneda</span><b>MXN</b></div>
+      </div>
+    </div>
+
+    <!-- PARTES -->
+    <div class="parties">
+      <div>
+        <span class="label">Cliente</span>
+        <b>David [Apellido]</b>
+        <p>Distribuidor QT Tools · Zona norte de México</p>
+      </div>
+      <div>
+        <span class="label">Proyecto</span>
+        <b>Sitio de presentación para licitación Hyundai</b>
+        <p>Equipo de distribución norte de México y sur de California</p>
+      </div>
+    </div>
+
+    <p class="scope">
+      Sitio web formal que presenta a <strong>David como distribuidor QT Tools en la zona norte de México</strong>
+      y a su compañero en el sur de California, con sus tarjetas de distribución, un
+      <strong>saludo personalizado a Hyundai</strong> y un enlace al catálogo oficial de QT Tools en China.
+      Cada opción incluye todo lo de la anterior.
+    </p>
+    <span class="note">Los precios cubren únicamente la mano de obra</span>
+
+    <!-- OPCIONES -->
+    <div class="options">
+      <div class="options-head">
+        <span class="label" style="color:var(--text)">Opciones</span>
+        <span class="label">Detalle de la mano de obra</span>
+      </div>
+
+      <div class="option">
+        <div class="opt-side">
+          <span class="opt-tag">Opción 1</span>
+          <h3>Landing de una página</h3>
+          <span class="sub">Para cumplir con Hyundai de forma directa.</span>
+          <div class="price num">$5,000<small>MXN</small></div>
+          <div class="opt-meta"><span><b>3</b> días hábiles</span><span><b>2</b> rondas de cambios</span></div>
+        </div>
+        <div class="opt-work">
+          <ul>
+            <li><span><strong>Diseño visual</strong> del sitio: estructura, estilo, tipografía y colores.</span></li>
+            <li><span><strong>Desarrollo</strong> de la página, adaptada a celular, tablet y computadora.</span></li>
+            <li><span><strong>Redacción del saludo</strong> personalizado a Hyundai agradeciendo la invitación a la licitación.</span></li>
+            <li><span><strong>Sección de equipo</strong> con las 2 tarjetas de distribución (norte de México y California) y contacto directo: teléfono, WhatsApp y correo.</span></li>
+            <li><span><strong>Enlace al catálogo</strong> oficial de QT Tools en China.</span></li>
+            <li><span><strong>Publicación</strong> del sitio en línea y entrega del link listo para compartir.</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="option">
+        <div class="opt-side">
+          <span class="opt-tag">Opción 2</span>
+          <h3>Sitio de 3 páginas</h3>
+          <span class="sub">Presenta al equipo y recibe solicitudes de cotización.</span>
+          <div class="price num">$7,500<small>MXN</small></div>
+          <div class="opt-meta"><span><b>5</b> días hábiles</span><span><b>2</b> rondas de cambios</span></div>
+        </div>
+        <div class="opt-work">
+          <span class="inherit">Todo lo de la Opción 1, más:</span>
+          <ul>
+            <li><span><strong>3 páginas</strong> con menú de navegación: Inicio, Nosotros y Cotizar.</span></li>
+            <li><span><strong>Página "Sobre nosotros"</strong>: diseño y redacción a partir de la información que proporciones (trayectoria, cobertura, experiencia).</span></li>
+            <li><span><strong>Página de cotización</strong> con formulario: empresa, material a cortar, medida o número de parte, cantidad y plano adjunto.</span></li>
+            <li><span><strong>Configuración del formulario</strong> para que las solicitudes lleguen directo a tu correo, con prueba de envío.</span></li>
+            <li><span><strong>Acceso directo a WhatsApp</strong> de cada distribuidor desde la página de cotización.</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="option">
+        <div class="opt-side">
+          <span class="opt-tag">Opción 3</span>
+          <h3>Sitio de 3 páginas, español e inglés</h3>
+          <span class="sub">Para el equipo de California y el personal de Hyundai.</span>
+          <div class="price num">$9,000<small>MXN</small></div>
+          <div class="opt-meta"><span><b>6</b> días hábiles</span><span><b>2</b> rondas de cambios</span></div>
+        </div>
+        <div class="opt-work">
+          <span class="inherit">Todo lo de la Opción 2, más:</span>
+          <ul>
+            <li><span><strong>Traducción al inglés</strong> de las 3 páginas: saludo, nosotros, equipo y cotización.</span></li>
+            <li><span><strong>Botón ES / EN</strong> en el menú; el idioma elegido se mantiene al cambiar de página.</span></li>
+            <li><span><strong>Link directo en inglés</strong> para compartir con contactos que no hablan español.</span></li>
+            <li><span><strong>Formulario bilingüe</strong>; las solicitudes llegan indicando en qué idioma se llenaron.</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- IMPORTES -->
+    <div class="totals totals-section">
+      <div class="totals-copy">
+        <span class="label">Resumen</span>
+        <h4>Importe por opción</h4>
+        <p>Se elige una sola opción. Los importes corresponden a la mano de obra de diseño, desarrollo y publicación del sitio.</p>
+      </div>
+      <div class="totals-table">
+        <div class="t-row"><span>Opción 1 · Landing de una página</span><b class="num">$5,000 MXN</b></div>
+        <div class="t-row"><span>Opción 2 · Sitio de 3 páginas</span><b class="num">$7,500 MXN</b></div>
+        <div class="t-row"><span>Opción 3 · Sitio de 3 páginas bilingüe</span><b class="num">$9,000 MXN</b></div>
+      </div>
+    </div>
+
+    <!-- TÉRMINOS -->
+    <div class="terms">
+      <div class="term">
+        <span class="label">No incluye</span>
+        <ul>
+          <li>Dominio propio, costo anual aparte a nombre del cliente.</li>
+          <li>Correo profesional con dominio propio.</li>
+          <li>Fotografías, logotipos o diseño de tarjetas nuevas.</li>
+          <li>Mantenimiento posterior a la entrega.</li>
+        </ul>
+      </div>
+      <div class="term">
+        <span class="label">Para comenzar</span>
+        <ul>
+          <li>Datos de contacto de ambos distribuidores.</li>
+          <li>Foto o archivo de las 2 tarjetas.</li>
+          <li>Información para "Sobre nosotros" <b>(opc. 2 y 3)</b>.</li>
+          <li>Correo para recibir cotizaciones <b>(opc. 2 y 3)</b>.</li>
+        </ul>
+      </div>
+      <div class="term">
+        <span class="label">Condiciones</span>
+        <ul>
+          <li><b>Pago:</b> 50% para iniciar, 50% al entregar.</li>
+          <li><b>Tiempos:</b> cuentan desde el anticipo y la entrega de la información.</li>
+          <li><b>Cambios:</b> 2 rondas incluidas; adicionales se cotizan aparte.</li>
+          <li><b>Proceso:</b> prototipo para revisión antes de la versión final.</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ACEPTACIÓN -->
+  <form class="accept" id="acceptForm" autocomplete="off">
+    <div class="accept-intro">
+      <span class="label">Aceptación</span>
+      <h4>Opción elegida</h4>
+      <div class="checks" role="radiogroup" aria-label="Opción elegida">
+        <label><input type="radio" name="opcion" value="1"><span>Opción 1</span></label>
+        <label><input type="radio" name="opcion" value="2"><span>Opción 2</span></label>
+        <label><input type="radio" name="opcion" value="3"><span>Opción 3</span></label>
+      </div>
+      <p class="no-print">Elige una opción, escribe tu nombre y firma en el recuadro. Después guarda el PDF y envíamelo por WhatsApp o correo.</p>
+      <div class="stamp" id="stamp">Presupuesto aceptado</div>
+    </div>
+
+    <div class="sigbox">
+      <span class="label">Firma del cliente</span>
+      <div class="sigpad" id="sigpad">
+        <canvas id="sigCanvas" aria-label="Recuadro para firmar"></canvas>
+        <span class="hint">Firma aquí con el mouse o con el dedo</span>
+      </div>
+      <div class="sig-actions no-print">
+        <button type="button" class="link-btn" id="clearSig">Borrar firma</button>
+      </div>
+    </div>
+
+    <div class="fields">
+      <div class="field">
+        <label class="label" for="signName">Nombre completo</label>
+        <input id="signName" type="text" placeholder="Nombre y apellido" autocomplete="name">
+      </div>
+      <div class="field">
+        <label class="label" for="signDate">Fecha</label>
+        <input id="signDate" type="date">
+      </div>
+      <div class="form-msg no-print" id="formMsg" role="status"></div>
+      <button type="submit" class="sign-btn no-print">Firmar y guardar PDF</button>
+    </div>
+  </form>
+  <div class="sheet-foot">
+    <span>Obed Vega · Product Builder · Tijuana, B.C.</span>
+    <a href="https://obedvega.github.io/portfolio/" target="_blank" rel="noopener">obedvega.github.io/portfolio ↗</a>
+  </div>
+
+</div>
+
+<button class="print-btn no-print" onclick="window.print()">Guardar PDF</button>
+
+<script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.13/dist/html-to-image.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script>
+/* ===== CONFIGURACIÓN =====
+   Correo donde te llega una copia del PDF firmado. Déjalo vacío ("") para solo descargar.
+   La primera vez, FormSubmit manda un correo de activación a esta dirección: confírmalo una vez. */
+const CORREO_COPIA = "tu-correo@ejemplo.com";
+/* ========================= */
+(() => {
+  const sheet = document.querySelector('.sheet');
+  const form = document.getElementById('acceptForm');
+  const pad = document.getElementById('sigpad');
+  const canvas = document.getElementById('sigCanvas');
+  const ctx = canvas.getContext('2d');
+  const nameIn = document.getElementById('signName');
+  const dateIn = document.getElementById('signDate');
+  const msg = document.getElementById('formMsg');
+  const options = document.querySelectorAll('.option');
+  let drawing = false, hasInk = false, last = null, strokes = [];
+
+  // Fecha de hoy por defecto
+  const d = new Date();
+  dateIn.value = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+
+  // Lienzo nítido en pantallas retina; redibuja al cambiar de tamaño
+  function resize() {
+    const r = canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = Math.max(1, r.width * dpr);
+    canvas.height = Math.max(1, r.height * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2.2;
+    strokes.forEach(s => { ctx.beginPath(); s.forEach((p, i) => i ? ctx.lineTo(p.x * r.width, p.y * r.height) : ctx.moveTo(p.x * r.width, p.y * r.height)); ctx.stroke(); });
+  }
+  const pos = e => {
+    const r = canvas.getBoundingClientRect();
+    return { x: (e.clientX - r.left) / r.width, y: (e.clientY - r.top) / r.height, w: r.width, h: r.height };
+  };
+  canvas.addEventListener('pointerdown', e => {
+    drawing = true; canvas.setPointerCapture(e.pointerId);
+    last = pos(e); strokes.push([{ x: last.x, y: last.y }]);
+  });
+  canvas.addEventListener('pointermove', e => {
+    if (!drawing) return;
+    const p = pos(e);
+    ctx.beginPath(); ctx.moveTo(last.x * p.w, last.y * p.h); ctx.lineTo(p.x * p.w, p.y * p.h); ctx.stroke();
+    strokes[strokes.length - 1].push({ x: p.x, y: p.y });
+    last = p;
+    if (!hasInk) { hasInk = true; pad.classList.add('signed'); }
+  });
+  ['pointerup', 'pointercancel', 'pointerleave'].forEach(t => canvas.addEventListener(t, () => drawing = false));
+
+  document.getElementById('clearSig').addEventListener('click', () => {
+    strokes = []; hasInk = false; pad.classList.remove('signed'); sheet.classList.remove('is-signed');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  });
+
+  // Resalta la opción elegida en el documento
+  form.querySelectorAll('input[name="opcion"]').forEach(r => r.addEventListener('change', () => {
+    options.forEach((o, i) => o.classList.toggle('chosen', String(i + 1) === r.value));
+    msg.textContent = '';
+  }));
+
+  const submitBtn = form.querySelector('.sign-btn');
+  const slug = t => t.normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^\w]+/g,'-').replace(/^-|-$/g,'');
+
+  // Genera el PDF tamaño carta a partir de la hoja, cortando entre bloques
+  async function buildPdf() {
+    document.body.classList.add('exporting');
+    const dv = dateIn.value;                       // fecha como texto (sin ícono de calendario)
+    dateIn.type = 'text'; dateIn.value = dv ? dv.split('-').reverse().join('/') : '';
+    resize();
+    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+    try {
+      const W = 816, H = Math.round(W * 11 / 8.5), SCALE = 2;
+      const top0 = sheet.getBoundingClientRect().top;
+      const total = sheet.scrollHeight;
+      const cuts = [...sheet.querySelectorAll('.letterhead, .title-row, .parties, .scope, .options-head, .option, .totals, .terms, .accept')]
+        .map(el => Math.round(el.getBoundingClientRect().top - top0)).filter(y => y > 0).sort((a, b) => a - b);
+      const pages = []; let start = 0;
+      while (start < total - 2) {
+        let end = start + H;
+        if (end >= total) end = total;
+        else { const fit = cuts.filter(y => y > start + 200 && y <= end); if (fit.length) end = fit[fit.length - 1]; }
+        pages.push([start, end]); start = end;
+      }
+      const full = await htmlToImage.toCanvas(sheet, { pixelRatio: SCALE, backgroundColor: '#f8f8f5', width: W, height: total });
+      const pdf = await PDFLib.PDFDocument.create();
+      pdf.setTitle(document.title); pdf.setAuthor('Obed Vega');
+      for (const [a, b] of pages) {
+        const c = document.createElement('canvas');
+        c.width = W * SCALE; c.height = H * SCALE;
+        const g = c.getContext('2d');
+        g.fillStyle = '#ffffff'; g.fillRect(0, 0, c.width, c.height);
+        g.drawImage(full, 0, a * SCALE, W * SCALE, (b - a) * SCALE, 0, 0, W * SCALE, (b - a) * SCALE);
+        const jpg = await pdf.embedJpg(c.toDataURL('image/jpeg', 0.9));
+        const page = pdf.addPage([612, 792]);
+        page.drawImage(jpg, { x: 0, y: 0, width: 612, height: 792 });
+      }
+      return new Blob([await pdf.save()], { type: 'application/pdf' });
+    } finally {
+      document.body.classList.remove('exporting');
+      dateIn.type = 'date'; dateIn.value = dv;
+      resize();
+    }
+  }
+
+  function download(blob, name) {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  }
+
+  // Envía una copia a tu correo (FormSubmit, sin servidor); se envía en un iframe oculto
+  function sendCopy(blob, name, data) {
+    if (!CORREO_COPIA || CORREO_COPIA.includes('ejemplo')) return false;
+    const iframe = document.createElement('iframe');
+    iframe.name = 'copia-' + Date.now(); iframe.hidden = true;
+    document.body.appendChild(iframe);
+    const f = document.createElement('form');
+    f.action = 'https://formsubmit.co/' + CORREO_COPIA; f.method = 'POST';
+    f.enctype = 'multipart/form-data'; f.target = iframe.name; f.hidden = true;
+    const add = (k, v) => { const i = document.createElement('input'); i.type = 'hidden'; i.name = k; i.value = v; f.appendChild(i); };
+    add('_subject', `Presupuesto firmado · Opción ${data.opcion} · ${data.nombre}`);
+    add('_template', 'table'); add('_captcha', 'false');
+    add('Cliente', data.nombre); add('Opción elegida', data.opcion); add('Fecha de firma', data.fecha);
+    const file = document.createElement('input'); file.type = 'file'; file.name = 'attachment';
+    const dt = new DataTransfer(); dt.items.add(new File([blob], name, { type: 'application/pdf' }));
+    file.files = dt.files; f.appendChild(file);
+    document.body.appendChild(f); f.submit();
+    setTimeout(() => { f.remove(); iframe.remove(); }, 15000);
+    return true;
+  }
+
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    const opt = form.querySelector('input[name="opcion"]:checked');
+    if (!opt) { msg.textContent = 'Elige una opción.'; return; }
+    if (!nameIn.value.trim()) { msg.textContent = 'Escribe tu nombre.'; nameIn.focus(); return; }
+    if (!hasInk) { msg.textContent = 'Firma en el recuadro.'; return; }
+    const nombre = nameIn.value.trim();
+    msg.style.color = ''; msg.textContent = '';
+    sheet.classList.add('is-signed');
+    document.getElementById('stamp').textContent = `Presupuesto aceptado · Opción ${opt.value}`;
+    document.title = `Presupuesto aceptado · Opción ${opt.value} · ${nombre}`;
+    const fileName = `Presupuesto-QT-Tools-Opcion-${opt.value}-${slug(nombre)}.pdf`;
+
+    if (!window.htmlToImage || !window.PDFLib) { window.print(); return; }   // sin internet: usa imprimir
+    submitBtn.disabled = true; submitBtn.textContent = 'Generando PDF…';
+    try {
+      const blob = await buildPdf();
+      download(blob, fileName);
+      const sent = sendCopy(blob, fileName, { nombre, opcion: opt.value, fecha: dateIn.value });
+      msg.style.color = 'var(--accent)';
+      msg.textContent = sent ? 'PDF guardado y enviado. ¡Gracias!' : 'PDF guardado.';
+      window.__lastPdf = blob;
+    } catch (err) {
+      console.error(err);
+      msg.textContent = 'No se pudo generar el PDF; se abrirá la ventana de impresión.';
+      window.print();
+    } finally {
+      submitBtn.disabled = false; submitBtn.textContent = 'Firmar y guardar PDF';
+    }
+  });
+
+  window.addEventListener('resize', resize);
+  window.addEventListener('beforeprint', resize);
+  window.addEventListener('afterprint', resize);
+  resize();
+})();
+</script>
+</body>
+</html>
