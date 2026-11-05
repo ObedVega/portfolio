@@ -379,7 +379,7 @@
   <!-- MEMBRETE -->
   <div class="letterhead">
     <div class="logo">obed<span></span></div>
-    <div class="who">Obed Vega <br>Tijuana, B.C. · obedvega.github.io/portfolio</div>
+    <div class="who">Obed Vega · Product Builder<br>Tijuana, B.C. · obedvega.github.io/portfolio</div>
   </div>
 
   <div class="pad">
@@ -401,7 +401,7 @@
     <div class="parties">
       <div>
         <span class="label">Cliente</span>
-        <b>David [Apellido]</b>
+        <b>David </b>
         <p>Distribuidor QT Tools · Zona norte de México</p>
       </div>
       <div>
@@ -504,9 +504,8 @@
             <li><span><strong>Hosting por 12 meses</strong> en un servidor administrado por mí.</span></li>
             <li><span><strong>Configuración del servidor</strong> y publicación del sitio.</span></li>
             <li><span><strong>Conexión del dominio</strong> al servidor (DNS).</span></li>
-            <li><span><strong>Certificado de seguridad SSL</strong> (candado https) instalado y con renovación automática.</span></li>
           </ul>
-          <div class="infra-aside"><b>Dominio no incluido.</b> Se compra a nombre del cliente con el proveedor que elija; un .com o .com.mx cuesta aprox. $300 a $650 MXN al año. La renovación del hosting a partir del segundo año se cotiza aparte.</div>
+          <div class="infra-aside"><b>Dominio y certificado SSL no incluidos.</b> El dominio se compra a nombre del cliente con el proveedor que elija; un .com o .com.mx cuesta aprox. $300 a $650 MXN al año. La renovación del hosting a partir del segundo año se cotiza aparte.</div>
         </div>
       </div>
     </div>
@@ -525,6 +524,7 @@
         <span class="label">No incluye</span>
         <ul>
           <li>Compra del dominio (aprox. $300–$650 MXN al año).</li>
+          <li>Certificado de seguridad SSL.</li>
           <li>Correo profesional con dominio propio.</li>
           <li>Fotografías, logotipos o diseño de tarjetas nuevas.</li>
           <li>Mantenimiento posterior a la entrega.</li>
@@ -552,46 +552,8 @@
 
   </div>
 
-  <!-- ACEPTACIÓN -->
-  <form class="accept" id="acceptForm" autocomplete="off">
-    <div class="accept-intro">
-      <span class="label">Aceptación</span>
-      <h4>Opción elegida</h4>
-      <div class="checks" role="radiogroup" aria-label="Opción elegida">
-        <label><input type="radio" name="opcion" value="1"><span>Opción 1</span></label>
-        <label><input type="radio" name="opcion" value="2"><span>Opción 2</span></label>
-        <label><input type="radio" name="opcion" value="3"><span>Opción 3</span></label>
-      </div>
-      <p class="no-print">Elige una opción, escribe tu nombre y firma en el recuadro. Después guarda el PDF y envíamelo por WhatsApp o correo.</p>
-      <div class="stamp" id="stamp">Presupuesto aceptado</div>
-    </div>
-
-    <div class="sigbox">
-      <span class="label">Firma del cliente</span>
-      <div class="sigpad" id="sigpad">
-        <canvas id="sigCanvas" aria-label="Recuadro para firmar"></canvas>
-        <span class="hint">Firma aquí con el mouse o con el dedo</span>
-      </div>
-      <div class="sig-actions no-print">
-        <button type="button" class="link-btn" id="clearSig">Borrar firma</button>
-      </div>
-    </div>
-
-    <div class="fields">
-      <div class="field">
-        <label class="label" for="signName">Nombre completo</label>
-        <input id="signName" type="text" placeholder="Nombre y apellido" autocomplete="name">
-      </div>
-      <div class="field">
-        <label class="label" for="signDate">Fecha</label>
-        <input id="signDate" type="date">
-      </div>
-      <div class="form-msg no-print" id="formMsg" role="status"></div>
-      <button type="submit" class="sign-btn no-print">Firmar y guardar PDF</button>
-    </div>
-  </form>
   <div class="sheet-foot">
-    <span>Obed Vega · Tijuana, B.C.</span>
+    <span>Obed Vega · Product Builder · Tijuana, B.C.</span>
     <a href="https://obedvega.github.io/portfolio/" target="_blank" rel="noopener">obedvega.github.io/portfolio ↗</a>
   </div>
 
@@ -617,179 +579,6 @@
 
 <button class="print-btn no-print" onclick="window.print()">Guardar PDF</button>
 
-<script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.13/dist/html-to-image.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
-<script>
-/* ===== CONFIGURACIÓN =====
-   Correo donde te llega una copia del PDF firmado. Déjalo vacío ("") para solo descargar.
-   La primera vez, FormSubmit manda un correo de activación a esta dirección: confírmalo una vez. */
-const CORREO_COPIA = "tu-correo@ejemplo.com";
-/* ========================= */
-(() => {
-  const sheet = document.querySelector('.sheet');
-  const form = document.getElementById('acceptForm');
-  const pad = document.getElementById('sigpad');
-  const canvas = document.getElementById('sigCanvas');
-  const ctx = canvas.getContext('2d');
-  const nameIn = document.getElementById('signName');
-  const dateIn = document.getElementById('signDate');
-  const msg = document.getElementById('formMsg');
-  const options = document.querySelectorAll('.option');
-  let drawing = false, hasInk = false, last = null, strokes = [];
-
-  // Fecha de hoy por defecto
-  const d = new Date();
-  dateIn.value = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-
-  // Lienzo nítido en pantallas retina; redibuja al cambiar de tamaño
-  function resize() {
-    const r = canvas.getBoundingClientRect();
-    const dpr = window.devicePixelRatio || 1;
-    canvas.width = Math.max(1, r.width * dpr);
-    canvas.height = Math.max(1, r.height * dpr);
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-    ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2.2;
-    strokes.forEach(s => { ctx.beginPath(); s.forEach((p, i) => i ? ctx.lineTo(p.x * r.width, p.y * r.height) : ctx.moveTo(p.x * r.width, p.y * r.height)); ctx.stroke(); });
-  }
-  const pos = e => {
-    const r = canvas.getBoundingClientRect();
-    return { x: (e.clientX - r.left) / r.width, y: (e.clientY - r.top) / r.height, w: r.width, h: r.height };
-  };
-  canvas.addEventListener('pointerdown', e => {
-    drawing = true; canvas.setPointerCapture(e.pointerId);
-    last = pos(e); strokes.push([{ x: last.x, y: last.y }]);
-  });
-  canvas.addEventListener('pointermove', e => {
-    if (!drawing) return;
-    const p = pos(e);
-    ctx.beginPath(); ctx.moveTo(last.x * p.w, last.y * p.h); ctx.lineTo(p.x * p.w, p.y * p.h); ctx.stroke();
-    strokes[strokes.length - 1].push({ x: p.x, y: p.y });
-    last = p;
-    if (!hasInk) { hasInk = true; pad.classList.add('signed'); }
-  });
-  ['pointerup', 'pointercancel', 'pointerleave'].forEach(t => canvas.addEventListener(t, () => drawing = false));
-
-  document.getElementById('clearSig').addEventListener('click', () => {
-    strokes = []; hasInk = false; pad.classList.remove('signed'); sheet.classList.remove('is-signed');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-  });
-
-  // Resalta la opción elegida en el documento
-  form.querySelectorAll('input[name="opcion"]').forEach(r => r.addEventListener('change', () => {
-    options.forEach((o, i) => o.classList.toggle('chosen', String(i + 1) === r.value));
-    msg.textContent = '';
-  }));
-
-  const submitBtn = form.querySelector('.sign-btn');
-  const slug = t => t.normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^\w]+/g,'-').replace(/^-|-$/g,'');
-
-  // Genera el PDF tamaño carta a partir de la hoja, cortando entre bloques
-  async function buildPdf() {
-    document.body.classList.add('exporting');
-    const dv = dateIn.value;                       // fecha como texto (sin ícono de calendario)
-    dateIn.type = 'text'; dateIn.value = dv ? dv.split('-').reverse().join('/') : '';
-    resize();
-    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
-    try {
-      const W = 816, H = Math.round(W * 11 / 8.5), SCALE = 2;
-      const top0 = sheet.getBoundingClientRect().top;
-      const total = sheet.scrollHeight;
-      const cuts = [...sheet.querySelectorAll('.letterhead, .title-row, .parties, .scope, .options-head, .option, .infra, .grand, .terms, .accept')]
-        .map(el => Math.round(el.getBoundingClientRect().top - top0)).filter(y => y > 0).sort((a, b) => a - b);
-      const pages = []; let start = 0;
-      while (start < total - 2) {
-        let end = start + H;
-        if (end >= total) end = total;
-        else { const fit = cuts.filter(y => y > start + 200 && y <= end); if (fit.length) end = fit[fit.length - 1]; }
-        pages.push([start, end]); start = end;
-      }
-      const full = await htmlToImage.toCanvas(sheet, { pixelRatio: SCALE, backgroundColor: '#f8f8f5', width: W, height: total });
-      const pdf = await PDFLib.PDFDocument.create();
-      pdf.setTitle(document.title); pdf.setAuthor('Obed Vega');
-      for (const [a, b] of pages) {
-        const c = document.createElement('canvas');
-        c.width = W * SCALE; c.height = H * SCALE;
-        const g = c.getContext('2d');
-        g.fillStyle = '#ffffff'; g.fillRect(0, 0, c.width, c.height);
-        g.drawImage(full, 0, a * SCALE, W * SCALE, (b - a) * SCALE, 0, 0, W * SCALE, (b - a) * SCALE);
-        const jpg = await pdf.embedJpg(c.toDataURL('image/jpeg', 0.9));
-        const page = pdf.addPage([612, 792]);
-        page.drawImage(jpg, { x: 0, y: 0, width: 612, height: 792 });
-      }
-      return new Blob([await pdf.save()], { type: 'application/pdf' });
-    } finally {
-      document.body.classList.remove('exporting');
-      dateIn.type = 'date'; dateIn.value = dv;
-      resize();
-    }
-  }
-
-  function download(blob, name) {
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob); a.download = name;
-    document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
-  }
-
-  // Envía una copia a tu correo (FormSubmit, sin servidor); se envía en un iframe oculto
-  function sendCopy(blob, name, data) {
-    if (!CORREO_COPIA || CORREO_COPIA.includes('ejemplo')) return false;
-    const iframe = document.createElement('iframe');
-    iframe.name = 'copia-' + Date.now(); iframe.hidden = true;
-    document.body.appendChild(iframe);
-    const f = document.createElement('form');
-    f.action = 'https://formsubmit.co/' + CORREO_COPIA; f.method = 'POST';
-    f.enctype = 'multipart/form-data'; f.target = iframe.name; f.hidden = true;
-    const add = (k, v) => { const i = document.createElement('input'); i.type = 'hidden'; i.name = k; i.value = v; f.appendChild(i); };
-    add('_subject', `Presupuesto firmado · Opción ${data.opcion} · ${data.nombre}`);
-    add('_template', 'table'); add('_captcha', 'false');
-    add('Cliente', data.nombre); add('Opción elegida', data.opcion); add('Fecha de firma', data.fecha);
-    const file = document.createElement('input'); file.type = 'file'; file.name = 'attachment';
-    const dt = new DataTransfer(); dt.items.add(new File([blob], name, { type: 'application/pdf' }));
-    file.files = dt.files; f.appendChild(file);
-    document.body.appendChild(f); f.submit();
-    setTimeout(() => { f.remove(); iframe.remove(); }, 15000);
-    return true;
-  }
-
-  form.addEventListener('submit', async e => {
-    e.preventDefault();
-    const opt = form.querySelector('input[name="opcion"]:checked');
-    if (!opt) { msg.textContent = 'Elige una opción.'; return; }
-    if (!nameIn.value.trim()) { msg.textContent = 'Escribe tu nombre.'; nameIn.focus(); return; }
-    if (!hasInk) { msg.textContent = 'Firma en el recuadro.'; return; }
-    const nombre = nameIn.value.trim();
-    msg.style.color = ''; msg.textContent = '';
-    sheet.classList.add('is-signed');
-    document.getElementById('stamp').textContent = `Presupuesto aceptado · Opción ${opt.value}`;
-    document.title = `Presupuesto aceptado · Opción ${opt.value} · ${nombre}`;
-    const fileName = `Presupuesto-QT-Tools-Opcion-${opt.value}-${slug(nombre)}.pdf`;
-
-    if (!window.htmlToImage || !window.PDFLib) { window.print(); return; }   // sin internet: usa imprimir
-    submitBtn.disabled = true; submitBtn.textContent = 'Generando PDF…';
-    try {
-      const blob = await buildPdf();
-      download(blob, fileName);
-      const sent = sendCopy(blob, fileName, { nombre, opcion: opt.value, fecha: dateIn.value });
-      msg.style.color = 'var(--accent)';
-      msg.textContent = sent ? 'PDF guardado y enviado. ¡Gracias!' : 'PDF guardado.';
-      window.__lastPdf = blob;
-    } catch (err) {
-      console.error(err);
-      msg.textContent = 'No se pudo generar el PDF; se abrirá la ventana de impresión.';
-      window.print();
-    } finally {
-      submitBtn.disabled = false; submitBtn.textContent = 'Firmar y guardar PDF';
-    }
-  });
-
-  window.addEventListener('resize', resize);
-  window.addEventListener('beforeprint', resize);
-  window.addEventListener('afterprint', resize);
-  resize();
-})();
-</script>
 
 <script>
 /* Muestras de cada opción (capturas del prototipo) */
